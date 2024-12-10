@@ -7,7 +7,7 @@
 
 Bien que kubernetes offre une solution plus robuste et évolutive, il est idéal pour des environnements de prod complexes et à grande échelle.  
 Pour un cas de projet scolaire et donc des environnements moins complexes, docker swarm est plus adapté à l'infrastructure que nous mettons en place.  
-De plus, son utilisation est plus adaptée pour des débutants avec la technologie de conteneurs, ce qui est préférable pour notre groupe de 4 devs.  
+De plus, son utilisation est plus adaptée pour des débutants avec la technologie de conteneurs.  
 
 ---
 
