@@ -1,6 +1,6 @@
 gitlab_url: "http://gitlab-clo.com/"
-registration_token: xWX-gZDE4mZJjKSGPNmz
-access_token: glpat-iMqnaEz7S6o6kaqKHdjD
+registration_token: "{{ registration_token }}"
+access_token: "{{ access_token }}"
 locked: "false"
 
 runners:
