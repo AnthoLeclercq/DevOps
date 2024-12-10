@@ -1,0 +1,86 @@
+- name: Check if packages are already installed
+  package_facts:
+    manager: auto
+
+- name: Install prerequisites if needed
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg2
+      - software-properties-common
+      - python3-docker
+      - python3-pip
+      - python3-gitlab
+    state: present
+
+- name: Add GitLab repository
+  shell: curl https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | bash
+  when: "'gitlab-ce' not in ansible_facts.packages"
+  notify:
+    - Update apt cache
+
+- name: Install GitLab Community Edition
+  apt:
+    name: gitlab-ce
+    state: present
+  environment:
+    EXTERNAL_URL: http://gitlab-clo.com/
+    GITLAB_ROOT_PASSWORD: "{{ root_password }}"
+    REGISTRY_EXTERNAL_URL: http://gitlab-clo.com:5000/
+  notify:
+    - Reconfigure GitLab
+
+- name: Get private access token GitLab API
+  shell: "curl --header 'PRIVATE-TOKEN: {{ access_token }}' 'http://gitlab-clo.com/api/v4/personal_access_tokens?search={{ token_name }}'"
+  register: token_stdout
+  changed_when: false
+  ignore_errors: true
+  tags:
+    - token
+
+- name: Create access token GitLab
+  shell: >
+    gitlab-rails runner "token = User.find_by_username('{{ user_access_token }}').personal_access_tokens.create(scopes: ['read_user', 'read_repository', 'api', 'sudo', 'admin_mode', 'create_runner'], name: '{{ token_name }}', expires_at: 365.days.from_now); token.set_token('{{ access_token }}'); token.save!"
+  when:
+    - token_name not in token_stdout.stdout
+
+- name: GitLab create admin users
+  gitlab_user:
+    api_url: http://gitlab-clo.com/
+    validate_certs: False
+    api_token: "{{ access_token}}"
+    name: "{{ item.name }}"
+    username: "{{ item.username }}"
+    password: "{{ item.password }}"
+    email: "{{ item.email }}"
+    group: "CloTeam"
+    state: present
+    access_level: owner
+    confirm: Yes
+    isadmin: "{{ item.isadmin }}"
+  loop:
+    - { name: "{{ username_prof1 }}", username: "{{ username_prof1 }}", password: "{{ password }}", email: "{{ username_prof1 }}@etna-alternance.net", isadmin: Yes }
+    - { name: "{{ username_prof2 }}", username: "{{ username_prof2 }}", password: "{{ password }}", email: "{{ username_prof2 }}@etna-alternance.net", isadmin: Yes }
+
+
+- name: Create clo5-backend repository
+  gitlab_project:
+    api_url: http://gitlab-clo.com/
+    validate_certs: False
+    api_token: "{{ access_token }}"
+    name: clo5-backend
+    visibility: private
+    initialize_with_readme: true
+    state: present
+
+- name: Create clo5-frontend repository
+  gitlab_project:
+    api_url: http://gitlab-clo.com/
+    validate_certs: False
+    api_token: "{{ access_token }}"
+    name: clo5-frontend
+    visibility: private
+    initialize_with_readme: true
+    state: present

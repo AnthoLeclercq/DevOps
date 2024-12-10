@@ -1,0 +1,54 @@
+- name: Deploy Docker Swarm/Registry - Cluster
+  hosts: all
+  become: true
+  roles:
+    - role : './roles/docker_swarm'
+    - role : './roles/docker_registry'
+
+- name: Deploy Gitlab Instance on Manager
+  hosts: manager
+  become: true
+  roles:
+    - role : './roles/gitlab'
+
+- name: Deploy GitLab Runners
+  hosts: manager
+  become: true
+  roles:
+    - role: './roles/gitlab_runner'
+
+#- name: Deploy Traefik Reverse Proxy and Load Balancer
+#  hosts: all
+#  become: true
+#  roles:
+#    - role: './roles/traefik'
+# TODO: Terminer la conf traefik et ajouter le role elastic search/kibana
+
+# - name: Setup Docker Swarm Network
+#   hosts: all
+#   gather_facts: no
+#   tasks:
+#     - name: Create Docker Swarm network
+#       community.docker.docker_network:
+#         name: quantum_motors_network
+#         driver: overlay
+#         attachable: true
+#         state: present
+
+- name: Deploy MySQL Service
+  hosts: manager
+  become: true
+  roles:
+    - role: './roles/quantum_motors_db'
+#
+#- name: Deploy Backend Service
+#  hosts: all
+#  become: true
+#  roles:
+#    - role: './roles/backend_service'
+#
+#- name: Deploy Frontend Service
+#  hosts: all
+#  become: true
+#  roles:
+#    - role: './roles/frontend_service'

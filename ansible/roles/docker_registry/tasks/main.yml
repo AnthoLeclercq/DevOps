@@ -1,0 +1,19 @@
+- name: Check if packages is already installed
+  package_facts:
+    manager: auto
+
+- name: Deploy Docker Registry
+  docker_swarm_service:
+    name: registry
+    image: registry:2
+    publish: 
+    - published_port: 5000
+      target_port: 5000
+    mounts:
+    - source: /opt/stockage
+      target: /var/lib/registry
+    state: present
+  when:
+    - inventory_hostname in groups["manager"]
+  notify:
+    - Restart Docker Registry

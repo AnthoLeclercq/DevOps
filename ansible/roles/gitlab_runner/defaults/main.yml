@@ -1,0 +1,10 @@
+gitlab_url: "http://gitlab-clo.com/"
+registration_token: xWX-gZDE4mZJjKSGPNmz
+access_token: glpat-iMqnaEz7S6o6kaqKHdjD
+locked: "false"
+
+runners:
+  - name: "Docker Machine T11"
+    tag_list: "docker_T1"
+  - name: "Docker Machine T22"
+    tag_list: "docker_T2"

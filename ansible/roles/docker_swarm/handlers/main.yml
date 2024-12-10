@@ -1,0 +1,10 @@
+- name: Restart Docker Service
+  service:
+    name: docker
+    state: restarted
+  #listen: "Restart Docker Service"
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  #listen: "Update apt cache"

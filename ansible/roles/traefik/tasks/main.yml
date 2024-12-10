@@ -1,0 +1,21 @@
+---
+# tasks file for roles/traefik
+
+- name: Deploy Traefik
+  docker_swarm_service:
+    name: traefik
+    image: traefik:2
+    published_ports:
+      - "9090:9090"
+    mounts:
+      - source: /var/run/docker.sock
+        target: /var/run/docker.sock
+    readonly: true
+    state: present
+    args: 
+      - "--providers.swarm.endpoint=tcp://127.0.0.1:2377"
+      - "--entryPoints.web.address=:9090"
+    labels:
+      traefik.http.routers.my-container.rule: "Host(`quantum-traefik.com`)"
+      traefik.http.services.my-container-service.loadbalancer.server.port: "9090"
+  when: inventory_hostname in groups["manager"]

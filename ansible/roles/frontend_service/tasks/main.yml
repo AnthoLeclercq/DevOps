@@ -1,0 +1,14 @@
+- name: Deploy Frontend Service to Docker Swarm
+  community.docker.docker_swarm_service:
+    name: quantum_motors_frontend
+    image: "yourregistry/frontend_image:latest"  # Replace with your actual frontend Docker image
+    args:
+      - "yarn"
+      - "start"
+    networks:
+      - name: "quantum_motors_network"
+    ports:
+      - target: 4200
+        published: 80
+        protocol: tcp
+    replicas: 2

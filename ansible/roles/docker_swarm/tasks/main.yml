@@ -1,0 +1,59 @@
+- name: Check if packages are already installed
+  package_facts:
+    manager: auto
+
+- name: Install prerequisites
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg2
+      - software-properties-common
+      - python3-docker
+    state: present
+
+- name: Add Docker GPG key
+  shell: curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  args:
+    creates: /usr/share/keyrings/docker-archive-keyring.gpg
+
+- name: Add Docker repository
+  apt_repository:
+    repo: deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable
+    state: present
+  notify:
+    - Update apt cache
+
+- name: Install Docker CE
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: present
+  notify:
+    - Restart Docker Service
+
+- name: Enable and start Docker service
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Init Docker Swarm 
+  docker_swarm:
+    advertise_addr: "{{ ansible_host }}:2377"
+    state: present
+  register: output_swarm
+  when: 
+    - inventory_hostname in groups["manager"]
+
+- name: Join Docker Swarm 
+  docker_swarm:
+    advertise_addr: "{{ ansible_host }}:2377"
+    state: join
+    remote_addrs: "{{ hostvars[groups['manager'][0]]['ansible_host'] }}"
+    join_token: "{{ hostvars[groups['manager'][0]]['output_swarm']['swarm_facts']['JoinTokens']['Worker'] }}"
+  when: 
+    - inventory_hostname in groups["workers"]

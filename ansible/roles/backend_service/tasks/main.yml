@@ -1,0 +1,17 @@
+- name: Deploy Backend Service to Docker Swarm
+  community.docker.docker_swarm_service:
+    name: quantum_motors_backend
+    image: "{{ backend }}"  # Replace with your actual backend Docker image
+    args:
+      - "yarn"
+      - "start"
+    env:
+      DATABASE_URL: "{{ database_url }}"
+      NODE_ENV: "production"
+    networks:
+      - name: "quantum_motors_network"
+    ports:
+      - target: 3000
+        published: 3000
+        protocol: tcp
+    replicas: 2

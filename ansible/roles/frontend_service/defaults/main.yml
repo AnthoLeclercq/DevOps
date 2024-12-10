@@ -1,0 +1,4 @@
+frontend_image: "yourregistry/frontend_image:latest"
+frontend_port: 80  # The port on which the frontend service will be accessible
+frontend_target_port: 4200  # The port inside the container that the frontend service runs on
+frontend_replicas: 2

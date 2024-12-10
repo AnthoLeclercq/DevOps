@@ -1,0 +1,5 @@
+- name: Restart Docker Registry
+  service:
+    name: registry
+    state: restarted
+  #listen: "Restart Docker Registry"

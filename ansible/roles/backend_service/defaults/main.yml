@@ -1,0 +1,4 @@
+backend_image: "yourregistry/backend_image:latest" # TODO: Utiliser le registry
+backend_port: 3000
+backend_replicas: 2
+database_url: "mysql://admin:P@ssw0rd!@quantum_motors_db/quantum_motors"

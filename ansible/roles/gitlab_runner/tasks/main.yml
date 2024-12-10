@@ -1,0 +1,39 @@
+- name: Install GitLab Runner
+  become: true
+  ansible.builtin.apt:
+    name: gitlab-runner
+    state: latest
+  when: ansible_os_family == 'Debian'
+
+- name: Get list of all GitLab runners
+  uri:
+    url: "{{ gitlab_url }}api/v4/runners/all"
+    method: GET
+    headers:
+      PRIVATE-TOKEN: "{{ access_token }}"
+  register: gitlab_runners_response
+  ignore_errors: yes
+
+- name: Set fact for all GitLab runners
+  set_fact:
+    all_runners: "{{ gitlab_runners_response.json }}"
+
+
+- name: Register GitLab Runner
+  ansible.builtin.shell: |
+    gitlab-runner --debug register \
+    --non-interactive \
+    --url "{{ gitlab_url }}" \
+    --registration-token "{{ registration_token }}" \
+    --executor "docker" \
+    --docker-image "docker:16.9.1" \
+    --docker-volumes "/var/run/docker.sock:/var/run/docker.sock" \
+    --name "{{ item.name }}" \
+    --run-untagged="true" \
+    --locked="false" \
+    --access-level="not_protected"
+  loop: "{{ runners }}"
+  when: >
+    not (item.name in all_runners | map(attribute='description') | list)
+  become: true
+
